@@ -51,12 +51,20 @@ export const getUsuarioPorId = async (req, res) => {
 
 export const putUsuario = async (req, res = response) => {
     try {
-
         const { id } = req.params;
-        const { _id, password, email, ...data } = req.body;
+        const usuarioAuth = req.usuario;
+
+        if (id !== usuarioAuth.id) {
+            return res.status(403).json({
+                success: false,
+                msg: 'No tienes permiso para actualizar este usuario!'
+            });
+        }
+
+        const { password, ...data } = req.body;
 
         if (password) {
-            data.password = await hash(password)
+            data.password = await hash(password);
         }
 
         const usuario = await Usuario.findByIdAndUpdate(id, data, { new: true });
@@ -65,54 +73,38 @@ export const putUsuario = async (req, res = response) => {
             success: true,
             msg: 'El usuario fue actualizado!',
             usuario
-        })
+        });
 
     } catch (error) {
         res.status(500).json({
             success: false,
             msg: 'Error actualizando el usuario!',
             error
-        })
-    }
-}
-
-export const putPassword = async (req, res = response) => {
-    try {
-
-        const { id } = req.params;
-        const { password } = req.body;
-
-        if (password) {
-            data.password = await hash(password)
-        }
-
-        const usuario = await Usuario.findByIdAndUpdate(id, { new: true });
-
-        res.status(200).json({
-            success: true,
-            msg: 'Password update!',
-            usuario
-        })
-
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            msg: 'Error update!',
-            error
-        })
+        });
     }
 }
 
 export const deleteUsuario = async (req, res) => {
     try {
-
         const { id } = req.params;
+        const dUsuario = req.usuario;
 
-        const usuario = await Usuario.findByIdAndUpdate(id, { estado: false }, { new: true });
+        if (id !== dUsuario.id && dUsuario.role !== 'ADMIN') {
+            return res.status(403).json({
+                success: false,
+                msg: 'No tienes permiso para desactivar este usuario!'
+            });
+        }
+
+        const usuario = await Usuario.findByIdAndUpdate(
+            id,
+            { estado: false },
+            { new: true }
+        )
 
         res.status(200).json({
             success: true,
-            msg: 'Se desactivo el usuario!',
+            msg: 'Se desactivó el usuario!',
             usuario,
         })
 
@@ -120,7 +112,7 @@ export const deleteUsuario = async (req, res) => {
         res.status(500).json({
             success: false,
             msg: 'Error desactivando el usuario!',
-            error
+            error,
         })
     }
 }

@@ -70,13 +70,12 @@ export const register = async (req, res) => {
             role: data.role
         })
 
-        const token = await generarJWT(usuario.id);
 
         return res.status(201).json({
             message: "El usuario se registró satisfactoriamente!",
             userDetails: {
-                correo: usuario.correo,
-                token: token,
+                username: usuario.username,
+                correo: usuario.correo
             }
         });
 
