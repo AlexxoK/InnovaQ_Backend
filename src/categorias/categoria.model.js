@@ -5,6 +5,7 @@ const CategoriaSchema = Schema({
         type: String,
         required: [true, "El nombre es requerido!"],
         maxLength: 300,
+        lowercase: true
     },
 
     descripcion: {

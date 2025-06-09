@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { check } from "express-validator";
 import { postCategoria, getCategorias, getCategoriaPorNombre, putCategoria, deleteCategoria } from "./categoria.controller.js";
-import { idCategoriaValida, nombreCategoriaValido } from "../helpers/db-validator.js";
+import { idCategoriaValida, nombreCategoriaValido } from "../helpers/db-validator-categorias.js";
 import { validarCampos } from "../middlewares/validar-campos.js";
 
 const router = Router();

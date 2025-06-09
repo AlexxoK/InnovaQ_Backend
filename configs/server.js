@@ -6,7 +6,9 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { dbConnection } from './mongo.js';
 import limiter from '../src/middlewares/validar-cant-peticiones.js';
+import authRoutes from '../src/auth/auth.routes.js';
 import categoriaRoutes from '../src/categorias/categoria.routes.js';
+import usuarioRoutes from '../src/usuarios/usuario.routes.js';
 
 const middlewares = (app) => {
     app.use(express.urlencoded({ extended: false }));
@@ -18,7 +20,9 @@ const middlewares = (app) => {
 }
 
 const routes = (app) => {
+    app.use("/InnovaQ/v1/auth", authRoutes);
     app.use("/InnovaQ/v1/categorias", categoriaRoutes);
+    app.use("/InnovaQ/v1/usuarios", usuarioRoutes);
 }
 
 const conectarDB = async () => {

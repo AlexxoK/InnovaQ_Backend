@@ -1,0 +1,14 @@
+[{
+  "_id": {
+    "$oid": "68464711499f0ef455cfbe15"
+  },
+  "nombre": "hogar",
+  "descripcion": "Categoría para productos del hogar",
+  "status": true,
+  "createdAt": {
+    "$date": "2025-06-09T02:29:37.357Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-09T02:37:46.987Z"
+  }
+}]

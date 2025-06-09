@@ -107,7 +107,6 @@ export const deleteCategoria = async (req, res) => {
 
         const categoria = await Categoria.findByIdAndUpdate(id, { status: false }, { new: true });
 
-
         res.status(200).json({
             success: true,
             msg: 'Se desactivó la categoría!',
