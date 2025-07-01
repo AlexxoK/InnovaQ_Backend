@@ -11,6 +11,7 @@ import authRoutes from '../src/auth/auth.routes.js';
 import categoriaRoutes from '../src/categorias/categoria.routes.js';
 import usuarioRoutes from '../src/usuarios/usuario.routes.js';
 import Usuario from '../src/usuarios/usuario.model.js';
+import ProductoRoutes from '../src/productos/producto.routes.js';
 
 const middlewares = (app) => {
     app.use(express.urlencoded({ extended: false }));
@@ -25,6 +26,7 @@ const routes = (app) => {
     app.use("/InnovaQ/v1/auth", authRoutes);
     app.use("/InnovaQ/v1/categorias", categoriaRoutes);
     app.use("/InnovaQ/v1/usuarios", usuarioRoutes);
+    app.use("/InnovaQ/v1/productos", ProductoRoutes);
 }
 
 const conectarDB = async () => {
