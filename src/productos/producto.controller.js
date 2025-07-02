@@ -7,7 +7,7 @@ export const postProucto = async (req, res) => {
     try {
         const data = req.body;
         const categoria = await categoriaModel.findOne({ nombre: data.categoria });
-        const user = req.user;
+        const user = req.usuario;
 
         await validarPermisos(req);
 
@@ -22,7 +22,8 @@ export const postProucto = async (req, res) => {
         const newProduct = await productoModel.create({
             ...data,
             categoria: categoria,
-            imagen: imagen
+            imagen: imagen,
+            estado: true,
 
         })
         await newProduct.save();
@@ -34,7 +35,6 @@ export const postProucto = async (req, res) => {
             msg: "Producto guardado",
             producto: productoGuardado,
             role: user,
-            estado: true
         })
 
     } catch (error) {
@@ -49,7 +49,7 @@ export const postProucto = async (req, res) => {
 
 export const getProductos = async (req, res) => {
     try {
-        const productos = await productoModel.find({ status: true }).populate("categoria", "nombre")
+        const productos = await productoModel.find({ estado: true }).populate("categoria", "nombre")
         res.status(200).json({
             msg: "Productos obtenidos",
             productos
@@ -69,9 +69,9 @@ export const updateProducts = async (req, res) => {
         const usuario = req.usuario;
         await validarPermisos(req);
         await validarExistenciaProducto(id)
-        
+
         let imagen = "";
-        const updateData = {...data,};
+        const updateData = { ...data, };
 
         if (data.categoria) {
             const categoria = await categoriaModel.findOne({ nombre: data.categoria });
@@ -94,13 +94,38 @@ export const updateProducts = async (req, res) => {
             { new: true }
         ).populate("categoria", "nombre");
 
-         res.status(200).json({
+        res.status(200).json({
             success: true,
             message: "Producto Actualizado",
             producto: productoActualizado
         });
     } catch (error) {
         console.log(error)
+        res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
+
+export const deleteProductos = async (req, res) => {
+    const id = req.params.id;
+
+    try {
+        const producto = await productoModel.findById(id);
+        await validarPermisos(req);
+        await validarExistenciaProducto(id);
+
+        const productoDelete = await productoModel.findByIdAndUpdate(id, {estado: false}, { new: true });
+
+        res.status(200).json({
+            success: true,
+            message: "Producto eliminado",
+            productoDelete
+        })
+    } catch (error) {
+        console.log(error);
         res.status(500).json({
             success: false,
             message: error.message

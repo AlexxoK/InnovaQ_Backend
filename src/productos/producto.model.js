@@ -7,7 +7,7 @@ const ProductosSchema = Schema({
     imagen : {type: String},
     precio: {type: Number, required: ["El precio es obligatorio"]},
     stock : {type: Number, required: ["El stock es obligatorio"]},
-    status : {type: Boolean,},
+    estado : {type: Boolean,},
 }, {timestamps: true});
 
 export default mongoose.model("Productos", ProductosSchema);
