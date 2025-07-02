@@ -1,13 +1,31 @@
 import multer from "multer";
+import path from "path";
 
+// Almacenamiento en disco
 const storage = multer.diskStorage({
-  destination: './images',
-  filename: function (_req, file, cb) {
-    const extension = file.originalname.slice(file.originalname.lastIndexOf('.'));
-    cb(null, Date.now() + extension);
+  destination: function (req, file, cb) {
+    cb(null, "./src/images"); // carpeta donde guardarás las imágenes
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    const uniqueName = Date.now() + "-" + Math.round(Math.random() * 1E9);
+    cb(null, uniqueName + ext);
   }
 });
 
-const upload = multer({ storage });
+// Filtro de archivo: solo permitir jpg, jpeg, png
+const fileFilter = (req, file, cb) => {
+  const ext = path.extname(file.originalname).toLowerCase();
+  if ([".jpg", ".jpeg", ".png"].includes(ext)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Formato de imagen no soportado. Usa JPG, JPEG o PNG."), false);
+  }
+};
 
-export default upload.single('imagen');
+const upload = multer({
+  storage,
+  fileFilter
+});
+
+export default upload;
