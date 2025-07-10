@@ -132,3 +132,21 @@ export const deleteProductos = async (req, res) => {
         })
     }
 }
+
+export const productoMasVendido = async (req, res) => {
+    try {
+        const productos = await productoModel.find({ stock: { $lte: 10 } }).sort({ stock: 1 })
+
+        const productosModificados = productos.map(producto => ({
+            ...producto.toObject(),
+            stock: producto.stock < 0 ? 0 : producto.stock
+        }))
+        res.status(200).json({
+            success: true,
+            msg: "Productos mas vendidos obtenidos correctamente",
+            productoMasVendido: productosModificados
+        })
+    } catch(error){
+    console.log(error);
+    }
+}

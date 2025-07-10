@@ -2,29 +2,29 @@ import { response, request } from "express";
 import { hash } from "argon2";
 import Usuario from "./usuario.model.js";
 
-export const getUsuarios = async (req = request, res = response) => {
+
+
+export const getListAuth = async (req, res) => {
     try {
-        const { limite = 10, desde = 0 } = req.query;
-        const query = { estado: true };
+        const usuario = req.usuario
 
-        const [total, usuarios] = await Promise.all([
-            Usuario.countDocuments(query),
-            Usuario.find(query)
-                .skip(Number(desde))
-                .limit(Number(limite))
-        ])
+        if(usuario.role != "ADMIN") {
+            throw new Error("Solo los administradores pueden ver esta seccion")
+        }
 
+        const clientes = await Usuario.find({role : "CLIENTE", estado: true})
+        .sort({createdAt: -1}) //orden de creacion del mas reciente al más antiguo
+        .limit(5);
         res.status(200).json({
             success: true,
-            total,
-            usuarios
-        })
-
-    } catch (error) {
+            msg: "Lista de clientes obtenidos correctamente",
+            cliente: clientes
+        });
+    } catch(error) {
+        console.log(error);
         res.status(500).json({
-            success: false,
-            msg: 'Error encontrando los usuarios!',
-            error
+            success: false, 
+            msg: "Lista de clientes no obtenidos",
         })
     }
 }
@@ -116,3 +116,26 @@ export const deleteUsuario = async (req, res) => {
         })
     }
 }
+
+export const listarNumeroDeClientes = async (req, res) => {
+    try {
+        const usuario = req.usuario;
+
+        if (usuario.role !== "ADMIN") {
+            throw new Error("Solo los administradores pueden ver esta seccion");
+        }
+
+       const cantidadClientes = await Usuario.countDocuments({ role: "CLIENTE", estado: true });
+        res.status(200).json({
+            success: true,
+            msg: "Lista de clientes obtenidos correctamente",
+            totalClientes: cantidadClientes,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            msg: "Lista de clientes no obtenidos",
+        });
+    }
+};

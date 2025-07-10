@@ -2,16 +2,22 @@ import Usuario from '../usuarios/usuario.model.js';
 import { hash, verify } from 'argon2';
 import { generarJWT } from '../helpers/generate-jwt.js';
 
+
 export const login = async (req, res) => {
 
-    const { correo, password } = req.body;
+    const { correo, password, username } = req.body;
 
     try {
 
         const lowerCorreo = correo ? correo.toLowerCase() : null;
+        const lowerUsername = username ? username.toLowerCase() : null;
 
         const usuario = await Usuario.findOne({
-            $or: [{ correo: lowerCorreo }]
+            $or: [
+                { correo: lowerCorreo },
+                {username: lowerUsername}
+            ]
+
         });
 
         if (!usuario) {
@@ -38,6 +44,7 @@ export const login = async (req, res) => {
         return res.status(200).json({
             msg: 'Login OK!',
             userDetails: {
+                username : usuario.username,
                 correo: usuario.correo,
                 token: token,
                 role: usuario.role,
