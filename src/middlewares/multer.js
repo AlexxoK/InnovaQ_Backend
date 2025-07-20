@@ -1,31 +1,28 @@
 import multer from "multer";
-import path from "path";
+import { dirname, extname, join } from "path";
+import { fileURLToPath } from "url";
 
-// Almacenamiento en disco
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./src/images"); // carpeta donde guardarás las imágenes
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    const uniqueName = Date.now() + "-" + Math.round(Math.random() * 1E9);
-    cb(null, uniqueName + ext);
-  }
-});
+const CURRENT_DIR = dirname(fileURLToPath(import.meta.url));
 
-// Filtro de archivo: solo permitir jpg, jpeg, png
+const MIMETYPES = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+const MAX_SIZE = 1024 * 1024 * 1024;
+
+const storage = multer.memoryStorage();
+
 const fileFilter = (req, file, cb) => {
-  const ext = path.extname(file.originalname).toLowerCase();
-  if ([".jpg", ".jpeg", ".png"].includes(ext)) {
-    cb(null, true);
-  } else {
-    cb(new Error("Formato de imagen no soportado. Usa JPG, JPEG o PNG."), false);
-  }
-};
+    if (MIMETYPES.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error(`Solo se permiten imágenes: ${MIMETYPES.join(", ")}`), false);
+    }
+}
 
 const upload = multer({
-  storage,
-  fileFilter
+    storage,
+    fileFilter,
+    limits: {
+        fileSize: MAX_SIZE,
+    },
 });
 
-export default upload;
+export const uploadImage  = upload.single("imagen"); 

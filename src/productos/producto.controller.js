@@ -1,5 +1,6 @@
 import categoriaModel from "../categorias/categoria.model.js";
 import productoModel from "./producto.model.js";
+import { subirImagenImgbb } from "../middlewares/imgbb.js";
 import { validarPermisos, validarExistenciaProducto, validarExistenciaCategoria } from "../helpers/db-validator-productos.js";
 
 
@@ -8,22 +9,22 @@ export const postProucto = async (req, res) => {
         const data = req.body;
         const categoria = await categoriaModel.findOne({ nombre: data.categoria });
         const user = req.usuario;
-
         await validarPermisos(req);
 
-        let imagen = "";
-        if (req.file) {
-            imagen = req.file.filename;
+        let imagenUrl;
+        if (req.file && req.file.buffer) {
+            imagenUrl = await subirImagenImgbb(req.file.buffer);
         } else if (data.imagen && data.imagen.startsWith("http")) {
-            imagen = data.imagen;
+            imagenUrl = data.imagen;
         } else {
-            return res.status(400).json({ msg: "No se subió imagen ni se proporcionó una URL válida" });
+            return res.status(400).json({ msg: "Debe proporcionar una imagen o una URL" });
         }
+
         const newProduct = await productoModel.create({
             ...data,
             categoria: categoria,
-            imagen: imagen,
             estado: true,
+            imagen: imagenUrl
 
         })
         await newProduct.save();
@@ -47,6 +48,8 @@ export const postProucto = async (req, res) => {
 
 }
 
+
+
 export const getProductos = async (req, res) => {
     try {
         const productos = await productoModel.find({ estado: true }).populate("categoria", "nombre")
@@ -67,11 +70,17 @@ export const updateProducts = async (req, res) => {
         const id = req.params.id;
         const data = req.body;
         const usuario = req.usuario;
+
+
         await validarPermisos(req);
         await validarExistenciaProducto(id)
 
-        let imagen = "";
         const updateData = { ...data, };
+
+        if (req.file && req.file.buffer) {
+            const nuevaUrlImagen = await subirImagenImgbb(req.file.buffer);
+            updateData.imagen = nuevaUrlImagen;
+        }
 
         if (data.categoria) {
             const categoria = await categoriaModel.findOne({ nombre: data.categoria });
@@ -81,11 +90,6 @@ export const updateProducts = async (req, res) => {
             }
 
             updateData.categoria = categoria._id;
-        }
-        if (req.file) {
-            updateData.imagen = req.file.filename;
-        } else if (data.imagen && data.imagen.startsWith("http")) {
-            updateData.imagen = data.imagen;
         }
 
         const productoActualizado = await productoModel.findByIdAndUpdate(
@@ -117,7 +121,7 @@ export const deleteProductos = async (req, res) => {
         await validarPermisos(req);
         await validarExistenciaProducto(id);
 
-        const productoDelete = await productoModel.findByIdAndUpdate(id, {estado: false}, { new: true });
+        const productoDelete = await productoModel.findByIdAndUpdate(id, { estado: false }, { new: true });
 
         res.status(200).json({
             success: true,
@@ -146,7 +150,7 @@ export const productoMasVendido = async (req, res) => {
             msg: "Productos mas vendidos obtenidos correctamente",
             productoMasVendido: productosModificados
         })
-    } catch(error){
-    console.log(error);
+    } catch (error) {
+        console.log(error);
     }
 }

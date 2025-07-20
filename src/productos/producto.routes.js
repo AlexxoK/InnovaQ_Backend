@@ -1,4 +1,4 @@
-import upload from "../middlewares/multer.js";
+import { uploadImage } from "../middlewares/multer.js";
 import { Router } from "express";
 import { validarJWT } from "../middlewares/validar-jwt.js";
 import { postProucto, getProductos, updateProducts, deleteProductos, productoMasVendido } from "./producto.controller.js";
@@ -6,9 +6,9 @@ import { postProucto, getProductos, updateProducts, deleteProductos, productoMas
 
 const router = Router();
 
-router.post('/agregar', validarJWT, upload.single("imagen"), postProucto)
+router.post('/agregar', validarJWT, uploadImage, postProucto),
 router.get('/lista', getProductos)
-router.put('/actualizar/:id', validarJWT, upload.single("imagen"), updateProducts)
+router.put('/actualizar/:id', validarJWT, uploadImage, updateProducts);
 router.delete('/eliminar/:id', validarJWT, deleteProductos)
 router.get('/mas-vendidos', validarJWT, productoMasVendido)
 export default router;
