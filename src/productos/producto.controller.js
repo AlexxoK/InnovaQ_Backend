@@ -6,7 +6,7 @@ import { validarPermisos, validarExistenciaProducto, validarExistenciaCategoria 
 
 export const postProucto = async (req, res) => {
     try {
-        const data = req.body;
+        const data = req.body; 
         const categoria = await categoriaModel.findOne({ nombre: data.categoria });
         const user = req.usuario;
         await validarPermisos(req);
