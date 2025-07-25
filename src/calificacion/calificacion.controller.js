@@ -9,9 +9,7 @@ export const crearCalificacion = async (req, res) => {
         const destinario = req.params.id;
         const yaExiste = await calificacionModel.findOne({usuario, destinario});
 
-        if(estrellas < 1 || estrellas > 5){
-            return res.status(400).json({error: 'El numero de estrellas debe ser un numero entre 1 y 5'});
-        }
+        
 
         if(yaExiste){
             return res.status(400).json({error: 'Ya calificaste ya no puedes calificar otra vez'});
