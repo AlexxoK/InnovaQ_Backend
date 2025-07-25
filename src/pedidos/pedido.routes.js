@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { check } from 'express-validator';
 import { validarCampos } from '../middlewares/validar-campos.js';
 import { validarJWT } from '../middlewares/validar-jwt.js';
-import { getPedidoById, getPedidos, savePedido } from './pedido.controller.js';
+import { deletePedido, getPedidoById, getPedidos, savePedido, updatePedido } from './pedido.controller.js';
 
 const router = Router();
 
@@ -24,6 +24,26 @@ router.get(
         validarCampos
     ],
     getPedidoById
+);
+
+router.put(
+    '/:id',
+    [
+        validarJWT,
+        check('id', 'ID invalido').not().isEmpty(),
+        validarCampos
+    ],
+    updatePedido
+);
+
+router.delete(
+    '/:id',
+    [
+        validarJWT,
+        check('id', 'ID invalido').not().isEmpty(),
+        validarCampos
+    ],
+    deletePedido
 );
 
 export default router;

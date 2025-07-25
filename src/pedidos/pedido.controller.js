@@ -1,7 +1,7 @@
 import Pedidos from './pedido.model.js';
 import Usuario from '../usuarios/usuario.model.js';
 import { request, response } from 'express';
-import { estadoPedido, existePedidoById, permisoPedido, soloCliente, validarProductosYTotal, validarTiempoEliminar } from '../helpers/db-validator-pedidos.js';
+import { actualizarPedido, estadoPedido, existePedidoById, permisoPedido, soloCliente, validarProductosYTotal, validarStockPedido, validarTiempo } from '../helpers/db-validator-pedidos.js';
 
 export const savePedido = async (req, res) => {
     try {
@@ -54,6 +54,15 @@ export const getPedidos = async (req = request, res = response) => {
                 .sort({ createdAt: -1 })
         ]);
 
+        pedidos.forEach(pedido => {
+            pedido.productos.forEach(item => {
+                item.producto = {
+                    ...item.producto.toObject(),
+                    stockVenta: item.producto.stock - 3
+                }
+            })
+        })
+
         res.status(200).json({
             success: true,
             total,
@@ -81,6 +90,13 @@ export const getPedidoById = async (req, res) => {
             .populate('user', 'nombre apellido username')
             .populate('productos.producto', 'nombre categoria instrucciones imagen precio stock');
 
+        pedido.productos.forEach(item => {
+            item.producto = {
+                ...item.producto.toObject(),
+                stockVenta: item.producto.stock - 3
+            }
+        })
+
         await estadoPedido(pedido);
 
         res.status(200).json({
@@ -103,12 +119,26 @@ export const updatePedido = async (req, res = response) => {
 
         const { id } = req.params;
         const { direccion, productos } = req.body;
-        const user = req.user._id;
+        const user = req.usuario._id;
 
         await existePedidoById(id);
 
         const pedido = await Pedidos.findById(id);
         await estadoPedido(pedido);
+        await permisoPedido(req, pedido);
+        await validarTiempo(pedido);
+
+        await actualizarPedido(id, { direccion, productos });
+
+        const pedidoDetails = await Pedidos.findById(id)
+            .populate('user', 'nombre apellido username')
+            .populate('productos.producto', 'nombre categoria instrucciones imagen precio stock');;
+
+        res.status(200).json({
+            success: true,
+            msg: 'Pedido actualizado exitosamente!!',
+            pedidoDetails
+        });
 
     } catch (error) {
         return res.status(500).json({
@@ -121,21 +151,26 @@ export const updatePedido = async (req, res = response) => {
 
 export const deletePedido = async (req, res = response) => {
     try {
-        
+
         const { id } = req.params;
 
-        await existePedidoById(id);
-        
         const pedido = await Pedidos.findById(id);
+        await existePedidoById(id);
         await permisoPedido(req, pedido);
-        await validarTiempoEliminar(pedido);
+        await validarTiempo(pedido);
 
-        const pedidoDelete = await Pedidos.findByIdAndUpdate(id, { estado: false }, { new: true });
+        await Pedidos.findByIdAndUpdate(id, { estado: false }, { new: true });
+
+        const pedidoDetails = await Pedidos.findById(id)
+            .populate('user', '_id nombre apellido username')
+            .populate('productos.producto', 'nombre categoria instrucciones imagen precio stock');
+
+        await validarStockPedido(pedidoDetails);
 
         res.status(200).json({
             success: true,
             msg: 'Pedido cancelado!!',
-            pedidoDelete
+            pedidoDetails
         });
 
     } catch (error) {
