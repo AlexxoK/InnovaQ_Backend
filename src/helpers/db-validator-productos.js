@@ -27,3 +27,15 @@ export const validarExistenciaCategoria = async (id = '') => {
         throw new Error("Categoria no encontrada")
     }
 }
+
+export const actualizarEstadoProducto = async (id) => {
+    const producto = await productoModel.findById(id);
+
+    if (producto.stock >= 4) {
+        producto.estado = true;
+        producto.save();
+    } else {
+        producto.estado = false;
+        producto.save();
+    }
+}

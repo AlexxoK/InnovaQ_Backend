@@ -1,7 +1,7 @@
 import categoriaModel from "../categorias/categoria.model.js";
 import productoModel from "./producto.model.js";
 import { subirImagenImgbb } from "../middlewares/imgbb.js";
-import { validarPermisos, validarExistenciaProducto, validarExistenciaCategoria } from "../helpers/db-validator-productos.js";
+import { validarPermisos, validarExistenciaProducto, validarExistenciaCategoria, actualizarEstadoProducto } from "../helpers/db-validator-productos.js";
 
 
 export const postProucto = async (req, res) => {
@@ -97,11 +97,16 @@ export const updateProducts = async (req, res) => {
             updateData,
             { new: true }
         ).populate("categoria", "nombre");
-
+        
+        await actualizarEstadoProducto(id);
+        
+        const productoActualizadoDetails = await productoModel.findById(id)
+            .populate("categoria", "nombre");
+        
         res.status(200).json({
             success: true,
             message: "Producto Actualizado",
-            producto: productoActualizado
+            producto: productoActualizadoDetails
         });
     } catch (error) {
         console.log(error)
