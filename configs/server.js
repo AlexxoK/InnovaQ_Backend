@@ -13,6 +13,7 @@ import usuarioRoutes from '../src/usuarios/usuario.routes.js';
 import Usuario from '../src/usuarios/usuario.model.js';
 import ProductoRoutes from '../src/productos/producto.routes.js';
 import CalificacionRoutes from '../src/calificacion/calificacion.routes.js';
+import PedidoRoutes from '../src/pedidos/pedido.routes.js';
 
 const middlewares = (app) => {
     app.use(express.urlencoded({ extended: false }));
@@ -29,6 +30,7 @@ const routes = (app) => {
     app.use("/InnovaQ/v1/usuarios", usuarioRoutes);
     app.use("/InnovaQ/v1/productos", ProductoRoutes);
     app.use("/InnovaQ/v1/calificacion", CalificacionRoutes);
+    app.use("/InnovaQ/v1/pedidos", PedidoRoutes);
 }
 
 const conectarDB = async () => {
