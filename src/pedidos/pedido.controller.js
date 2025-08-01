@@ -47,7 +47,7 @@ export const getPedidos = async (req = request, res = response) => {
         const [total, pedidos] = await Promise.all([
             Pedidos.countDocuments(query),
             Pedidos.find(query)
-                .populate('user', 'nombre apellido username')
+                .populate('user', 'nombre apellido username _id')
                 .populate('productos.producto', 'nombre categoria instrucciones imagen precio stock')
                 .skip(Number(desde))
                 .limit(Number(limite))
