@@ -1,5 +1,5 @@
-import Factura from "./facturas.model";
-import { getPedido } from "../helpers/db-validator-facturas";
+import Factura from "./facturas.model.js";
+import { getPedido } from "../helpers/db-validator-facturas.js";
 
 export const crearFactura = async (req, res) => {
     try {
