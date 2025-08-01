@@ -72,6 +72,7 @@ export const createAdmin = async () => {
                 apellido: "Pineda",
                 username: "RosaK",
                 correo: "rosa@gmail.com",
+                ingresos: 0,
                 password: hashedPassword,
                 phone: "12345678",
                 role: "ADMIN",

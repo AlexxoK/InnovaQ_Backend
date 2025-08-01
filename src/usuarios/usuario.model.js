@@ -48,6 +48,10 @@ const UsuarioSchema = Schema({
         enum: ["ADMIN", "CLIENTE"],
         default: "CLIENTE"
     },
+    ingresos: {
+        type: Number,
+        default: 0
+    },
 
     estado: {
         type: Boolean,

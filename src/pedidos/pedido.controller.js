@@ -1,7 +1,7 @@
 import Pedidos from './pedido.model.js';
 import Usuario from '../usuarios/usuario.model.js';
 import { request, response } from 'express';
-import { actualizarPedido, estadoPedido, existePedidoById, permisoPedido, soloCliente, validarProductosYTotal, validarStockPedido, validarTiempo } from '../helpers/db-validator-pedidos.js';
+import { actualizarPedido,validarPermisos, estadoPedido, existePedidoById, permisoPedido, soloCliente, validarProductosYTotal, validarStockPedido, validarTiempo } from '../helpers/db-validator-pedidos.js';
 
 export const savePedido = async (req, res) => {
     try {
@@ -114,6 +114,29 @@ export const getPedidoById = async (req, res) => {
     }
 }
 
+export const getPedidosPorUsuario = async (req, res) => {
+    try {
+        const user = req.usuario._id;
+
+        const pedidos = await Pedidos.find({user: user})
+            .populate('user', 'nombre apellido username')
+            .populate('productos.producto', 'nombre categoria instrucciones imagen precio stock');
+
+        res.status(200).json({
+            success: true,
+            msg: 'Pedidos obtenidos exitosamente!!',
+            pedidos
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            msg: 'Error al obtener los pedidos',
+            error: error.message
+        });
+    }
+}
+
 export const updatePedido = async (req, res = response) => {
     try {
 
@@ -181,3 +204,37 @@ export const deletePedido = async (req, res = response) => {
         });
     }
 }
+
+export const totalSumaAIngresos = async (req, res) => {
+    try {
+
+        await validarPermisos(req);
+       
+        const pedidos = await Pedidos.find({ estado: true });
+
+        
+        const totalIngresos = pedidos.reduce((acc, pedido) => acc + pedido.total, 0);
+
+        
+        const admin = await Usuario.findOne({ role: "ADMIN" });
+
+        
+        admin.ingresos = totalIngresos;
+        await admin.save();
+
+       
+        res.status(200).json({
+            success: true,
+            msg: "Ingresos actualizados correctamente con la suma de todos los pedidos",
+            ingresosTotales: totalIngresos,
+            admin
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            msg: "Error al calcular ingresos",
+            error: error.message
+        });
+    }
+};
